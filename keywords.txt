@@ -1,0 +1,37 @@
+#######################################
+# Syntax Coloring Map For _2020Bot_Library
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Bot_IR          KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+setup           KEYWORD2
+txFrequency     KEYWORD2
+txDataPin       KEYWORD2
+rxBusy          KEYWORD2
+rxDataReady     KEYWORD2
+rxData          KEYWORD2
+irRxIntEnable   KEYWORD2
+irRxIntDisable  KEYWORD2
+txData          KEYWORD2
+txInit          KEYWORD2
+irTxIntEnable   KEYWORD2
+irTxIntDisable  KEYWORD2
+txPing          KEYWORD2
+rxPing          KEYWORD2
+ping            KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
