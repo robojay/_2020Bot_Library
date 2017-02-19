@@ -1,34 +1,20 @@
 #include <Bot_IR.h>
 #include <Bot_Motor.h>
+#include <Bot_RemoteType.h>
 
+// Default remote will be the standard 2020 Bot remote
+// If you have a different one that is defined in Bot_Remote.h
+// select it here.
+// Otherwise, look at Bot_Remote.h for the required constants,
+// and use the Remote Receiver example to decode your specific
+// remote control.  NOT ALL REMOTES WILL WORK!
+
+//#define RemoteType VelikkaRemote
+
+#include <Bot_Remote.h>
 
 Bot_IR ir;
 Bot_Motor motor;
-
- //Velikka Remote
-const int32_t V_ch_minus = 0x00FFA25D;
-const int32_t V_ch = 0x00FF629D;
-const int32_t V_ch_plus = 0x00FFE21D;
-const int32_t V_prev = 0x00FF22DD;
-const int32_t V_next = 0x00FF02FD;
-const int32_t V_play = 0x00FFC23D;
-const int32_t V_vol_minus = 0x00FFE01F;
-const int32_t V_vol_plus = 0x00FFA857;
-const int32_t V_eq = 0x00FF906F;
-const int32_t V_0 = 0x00FF6897;
-const int32_t V_100 = 0x00FF9867;
-const int32_t V_200 = 0x00FFB04F;
-const int32_t V_1 = 0x00FF30CF;
-const int32_t V_2 = 0x00FF18E7;
-const int32_t V_3 = 0x00FF7A85;
-const int32_t V_4 = 0x00FF10EF;
-const int32_t V_5 = 0x00FF38C7;
-const int32_t V_6 = 0x00FF5AA5;
-const int32_t V_7 = 0x00FF42BD;
-const int32_t V_8 = 0x00FF4AB5;
-const int32_t V_9 = 0x00FF52AD;
-const int32_t No_Code = 0x00000000;
-
 
 // Arduino standard LED
 const uint8_t Led = 13;
@@ -77,17 +63,6 @@ motion_t bumperBehavior() {
   static motion_t lastBumped = None;
   static motion_t bumpAction = None;
   motion_t bumped = None;
-
-//  // interpret the sensors
-//  if ((leftSense > LeftThreshold) && (rightSense > RightThreshold)) {
-//    bumped = Forward;    
-//  }
-//  else if (leftSense > LeftThreshold) {
-//    bumped = Left;
-//  }
-//  else if (rightSense > RightThreshold) {
-//    bumped = Right;
-//  }
 
   if (irDetect) {
     bumped = Forward;
@@ -143,46 +118,55 @@ void loop() {
     
     irCode = ir.rxData();
     
-    if (irCode != No_Code) {
+    if (irCode != Remote_no_code) {
       Serial.print("Received: 0x");
       Serial.println(irCode, HEX);
     }
 
     switch (irCode) {
-      case V_play:
+      case Remote_play:
+      case Remote_hash:
         robotAction = None;
         robotMode = Autonomous;
         break;
-      case V_prev:
+      case Remote_prev:
+      case Remote_asterisk:
         robotAction = Stop;
         robotMode = Remote;
         motionTimeout = Timeout;
         break;
-      case V_2:
+      case Remote_2:
+      case Remote_up_arrow:
         robotAction = Forward;
         motionTimeout = Timeout;
         break;
-      case V_8:
+      case Remote_8:
+      case Remote_down_arrow:
         robotAction = Backward;
         motionTimeout = Timeout;
         break;
-      case V_4:
+      case Remote_4:
+      case Remote_left_arrow:
         robotAction = Left;
         motionTimeout = 100;
         break;
-      case V_6:
+      case Remote_6:
+      case Remote_right_arrow:
         robotAction = Right;
         motionTimeout = 100;
         break;
-      case V_5:
+      case Remote_5:
+      case Remote_ok:
         robotAction = Stop;
         motionTimeout = Timeout;
         break;
-      case V_vol_plus:
+      case Remote_vol_plus:
+      case Remote_3:
         irFrequency += IrStep;
         irFrequency = constrain(irFrequency, IrMin, IrMax);
         break;
-      case V_vol_minus:
+      case Remote_vol_minus:
+      case Remote_1:
         irFrequency -= IrStep;
         irFrequency = constrain(irFrequency, IrMin, IrMax);
         break;      
