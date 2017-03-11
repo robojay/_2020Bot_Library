@@ -13,3 +13,7 @@ If you decide to experiment with this library anyways, feel free to report issue
 Thanks for your understanding!
 
 --Jay
+
+##License##
+
+Copyright (c) 2017 Jay Francis. Licensed under the MIT license.
