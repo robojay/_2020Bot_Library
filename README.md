@@ -16,4 +16,4 @@ Thanks for your understanding!
 
 ##License##
 
-Copyright (c) 2017 Jay Francis. Licensed under the MIT license.
+Copyright (c) 2017 Jay Francis.  Licensed under the MIT license.
