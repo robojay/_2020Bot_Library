@@ -2,6 +2,8 @@
 
 An Arduino library designed to be used with the 2020 Bot (http://2020bot.com).
 
+Requires Timer One library (https://github.com/PaulStoffregen/TimerOne).
+
 ##Warning!!!##
 
 This is a work in progress and is in NO WAY suitable for general use yet.
