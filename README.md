@@ -1,10 +1,10 @@
-#2020 Bot Library#
+# 2020 Bot Library
 
 An Arduino library designed to be used with the 2020 Bot (http://2020bot.com).
 
 Requires Timer One library (https://github.com/PaulStoffregen/TimerOne).
 
-##Warning!!!##
+## Warning!!!
 
 This is a work in progress and is probablty not suitable for general use yet.
 
@@ -14,6 +14,6 @@ Thanks for your understanding!
 
 --Jay
 
-##License##
+## License
 
 Copyright (c) 2017 Jay Francis.  Licensed under the MIT license.
