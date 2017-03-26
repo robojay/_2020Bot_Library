@@ -237,11 +237,11 @@ void loop() {
           break;        
         case Left:
           motor.left(speed);
-          delayTimer = millis() + 250;
+          delayTimer = millis() + 100;
           break;
         case Right:
           motor.right(speed);
-          delayTimer = millis() + 250;
+          delayTimer = millis() + 100;
           break;        
         case Stop:
           motor.stop();
