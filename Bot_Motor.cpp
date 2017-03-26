@@ -47,13 +47,11 @@ void Bot_Motor::motor(bool motor, int v) {
     a = _leftAPin;
     b = _leftBPin;
     last = lastLeft;
-    v += _motorOffset;
   }
   else {
     a = _rightAPin;
     b = _rightBPin;
     last = lastRight;
-    v -= _motorOffset;
   }
 
   v = constrain(v, -255, 255);
@@ -79,23 +77,23 @@ void Bot_Motor::motor(bool motor, int v) {
 
 // simplified motor commands, using speed global
 void Bot_Motor::forward(int speed) {
-  motor(Left, speed);
-  motor(Right, speed);
+  motor(Left, speed + _motorOffset);
+  motor(Right, speed - _motorOffset);
 }
 
 void Bot_Motor::backward(int speed) {
-  motor(Left, -speed);
-  motor(Right, -speed);
+  motor(Left, -speed - _motorOffset);
+  motor(Right, -speed + _motorOffset);
 }
 
 void Bot_Motor::left(int speed) {
-  motor(Left, -speed);
-  motor(Right, speed);
+  motor(Left, -speed - _motorOffset);
+  motor(Right, speed + _motorOffset);
 }
 
 void Bot_Motor::right(int speed) {
-  motor(Left, speed);
-  motor(Right, -speed);
+  motor(Left, speed + _motorOffset);
+  motor(Right, -speed - _motorOffset);
 }
 
 void Bot_Motor::stop() {

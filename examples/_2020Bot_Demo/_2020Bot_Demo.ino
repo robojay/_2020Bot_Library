@@ -28,6 +28,10 @@ bool irDetect = false;
 
 // define the speed of motor
 int speed = 100;
+int motorOffset = 0;
+const int MotorOffsetMax = 10;
+const int MotorOffsetMin = -10;
+const int MotorOffsetStep = 2;
 const unsigned long Timeout = 5000;
 
 typedef enum {None, Forward, Backward, Left, Right, Stop} motion_t;
@@ -170,6 +174,16 @@ void loop() {
         irFrequency -= IrStep;
         irFrequency = constrain(irFrequency, IrMin, IrMax);
         break;      
+      case Remote_9:
+        motorOffset += MotorOffsetStep;
+        motorOffset = constrain(motorOffset, MotorOffsetMin, MotorOffsetMax);
+        motor.motorOffset(motorOffset);
+        break;
+      case Remote_7:
+        motorOffset -= MotorOffsetStep;
+        motorOffset = constrain(motorOffset, MotorOffsetMin, MotorOffsetMax);
+        motor.motorOffset(motorOffset);
+        break;
       default:
         robotAction = None;
         break;
