@@ -7,11 +7,13 @@
 #######################################
 
 Bot_IR          KEYWORD1
+Bot_Motor		KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
+# for BOT_IR
 setup           KEYWORD2
 txFrequency     KEYWORD2
 txDataPin       KEYWORD2
@@ -27,6 +29,18 @@ irTxIntDisable  KEYWORD2
 txPing          KEYWORD2
 rxPing          KEYWORD2
 ping            KEYWORD2
+
+# for Bot_Motor
+motor 			KEYWORD2
+forward 		KEYWORD2
+backward		KEYWORD2
+left			KEYWORD2
+right			KEYWORD2
+stop			KEYWORD2
+moveForward		KEYWORD2
+motorOffset		KEYWORD2
+motorOffset		KEYWORD2
+setup			KEYWORD2
 
 #######################################
 # Instances (KEYWORD2)
