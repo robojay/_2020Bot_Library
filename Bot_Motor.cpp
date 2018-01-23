@@ -19,16 +19,31 @@ Bot_Motor::Bot_Motor(uint8_t leftAPin, uint8_t leftBPin, uint8_t rightAPin, uint
   _leftAPin = leftAPin;
   _leftBPin = leftBPin;
   _rightAPin = rightAPin;
-  _rightBPin = rightBPin;
-  
-
+  _rightBPin = rightBPin;  
 }
 
 void Bot_Motor::setup() {
-  analogWrite(_leftAPin, 0);     
-  analogWrite(_leftBPin, 0);     
-  analogWrite(_rightAPin, 0);     
-  analogWrite(_rightBPin, 0);
+  #if defined(ARDUINO_ARCH_ESP32)
+    ledcSetup(LeftApwm, PwmFreq, PwmResolution);
+    ledcSetup(LeftBpwm, PwmFreq, PwmResolution);
+    ledcSetup(RightApwm, PwmFreq, PwmResolution);
+    ledcSetup(RightBpwm, PwmFreq, PwmResolution);
+
+    ledcAttachPin(_leftAPin, LeftApwm);
+    ledcAttachPin(_leftBPin, LeftBpwm);
+    ledcAttachPin(_rightAPin, RightApwm);
+    ledcAttachPin(_rightBPin, RightBpwm);
+
+    ledcWrite(LeftApwm, 0);
+    ledcWrite(LeftBpwm, 0);
+    ledcWrite(RightApwm, 0);
+    ledcWrite(RightBpwm, 0);    
+  #else
+    analogWrite(_leftAPin, 0);     
+    analogWrite(_leftBPin, 0);     
+    analogWrite(_rightAPin, 0);     
+    analogWrite(_rightBPin, 0);
+  #endif
 }
 
   
@@ -44,13 +59,23 @@ void Bot_Motor::motor(bool motor, int v) {
   v = (v * 255) / 100;
 
   if (motor == Left) {
-    a = _leftAPin;
-    b = _leftBPin;
+    #if defined(ARDUINO_ARCH_ESP32)
+      a = LeftApwm;
+      b = LeftBpwm;
+    #else
+      a = _leftAPin;
+      b = _leftBPin;
+    #endif
     last = lastLeft;
   }
   else {
-    a = _rightAPin;
-    b = _rightBPin;
+    #if defined(ARDUINO_ARCH_ESP32)
+      a = RightApwm;
+      b = RightBpwm;
+    #else
+      a = _rightAPin;
+      b = _rightBPin;
+    #endif
     last = lastRight;
   }
 
@@ -58,12 +83,22 @@ void Bot_Motor::motor(bool motor, int v) {
   
   if (v != last) {
     if (v > 0) {
-      analogWrite(a, v);
-      analogWrite(b, 0);
+      #if defined(ARDUINO_ARCH_ESP32)
+        ledcWrite(a, v);
+        ledcWrite(b, 0);
+      #else
+        analogWrite(a, v);
+        analogWrite(b, 0);
+      #endif
     }
     else {
-      analogWrite(a, 0);
-      analogWrite(b, -v);
+      #if defined(ARDUINO_ARCH_ESP32)
+        ledcWrite(a, 0);
+        ledcWrite(b, -v);
+      #else
+        analogWrite(a, 0);
+        analogWrite(b, -v);
+      #endif
     }
     if (motor == Left) {
       lastLeft = v;

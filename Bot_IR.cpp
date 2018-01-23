@@ -4,10 +4,16 @@
  * 2020Bot Infrared Remote Control and Sensor Library
  *
  */
+
+
 #include "Arduino.h"
 #include "Bot_IR.h"
-#include <TimerOne.h>
 
+#if defined(ARDUINO_ARCH_ESP32)
+  hw_timer_t* timer = NULL;
+#else
+  #include <TimerOne.h>
+#endif
 
 // Initializers
 // If no parameters are given, will default to the standard pins
@@ -56,7 +62,12 @@ unsigned int Bot_IR::txFrequency() {
 unsigned int Bot_IR::txFrequency(unsigned int setTxFrequency) {
     _txFrequency = setTxFrequency;
     if (_txToneActive) {
-        tone(_txTonePin, _txFrequency);
+        #if defined(ARDUINO_ARCH_ESP32)
+          ledcSetup(IrTonePwm, _txFrequency, IrToneResolution);
+          ledcWrite(IrTonePwm, 1<<(IrToneResolution - 1));
+        #else
+          tone(_txTonePin, _txFrequency);
+        #endif
     }
     return _txFrequency;
 }
@@ -91,8 +102,14 @@ void Bot_IR::setup() {
 // to setup
 void Bot_IR::setup(bool txInitialize) {
     pinMode(_rxPin, INPUT);
-    pinMode(_txTonePin, OUTPUT);
-    digitalWrite(_txDataPin, LOW);
+    #if defined(ARDUINO_ARCH_ESP32)
+      ledcSetup(IrTonePwm, _txFrequency, IrToneResolution);
+      ledcAttachPin(_txTonePin, IrTonePwm);
+      ledcWrite(IrTonePwm, 0);
+    #else
+      pinMode(_txTonePin, OUTPUT);
+      digitalWrite(_txDataPin, LOW);
+    #endif
     pinMode(_txDataPin, INPUT);
     Bot_IR::_defaultInstance = this;
     irRxIntEnable();
@@ -337,20 +354,38 @@ void Bot_IR::txInit() {
   pinMode(_txTonePin, OUTPUT);
   digitalWrite(_txDataPin, LOW);
   pinMode(_txDataPin, INPUT);
-  Timer1.initialize(IrTxTime);
+  #if defined(ARDUINO_ARCH_ESP32)
+    timer = timerBegin(0, 80, true);  
+    timerAttachInterrupt(timer, Bot_IR::irTxInterruptHandler, true);
+    timerAlarmWrite(timer, 500, true);
+  #else
+    Timer1.initialize(IrTxTime);
+  #endif
   irTxIntEnable();
-  tone(_txTonePin, _txFrequency);
+  #if defined(ARDUINO_ARCH_ESP32)
+    ledcWrite(IrTonePwm, 1<<(IrToneResolution - 1));
+  #else
+    tone(_txTonePin, _txFrequency);
+  #endif
   _txToneActive = true;
 }
 
 // Enable the transmitter interrupts
 void Bot_IR::irTxIntEnable() {
-  Timer1.attachInterrupt(Bot_IR::irTxInterruptHandler);
+  #if defined(ARDUINO_ARCH_ESP32)
+    timerAlarmEnable(timer);  
+  #else
+    Timer1.attachInterrupt(Bot_IR::irTxInterruptHandler);
+  #endif
 }
 
 // Disable the transmitter interrupts
 void Bot_IR::irTxIntDisable() {
-  Timer1.detachInterrupt();
+  #if defined(ARDUINO_ARCH_ESP32)
+    timerAlarmDisable(timer);  
+  #else
+    Timer1.detachInterrupt();
+  #endif
 }
 
 // Send a ping pulse
@@ -383,3 +418,4 @@ bool Bot_IR::ping() {
     txPing();
     return(rxPing());
 }
+

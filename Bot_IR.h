@@ -1,8 +1,13 @@
 #ifndef Bot_IR_h
 #define Bot_IR_h
 
+
 #include "Arduino.h"
-#include <TimerOne.h>
+#if defined(ARDUINO_ARCH_ESP32)
+    // TimerOne?
+#else
+    #include <TimerOne.h>
+#endif
 
 class Bot_IR {
     public:
@@ -30,9 +35,19 @@ class Bot_IR {
         bool rxPing(bool wait);
         bool ping();
         
-        const uint8_t IrRxPin = 2;
-        const uint8_t IrTxTonePin = 3;
-        const uint8_t IrTxDataPin = 12;
+        #if defined(ARDUINO_ARCH_ESP32)
+            const uint8_t IrRxPin = 4;
+            const uint8_t IrTxTonePin = 15;
+            const uint8_t IrTxDataPin = 2;
+
+            const uint8_t IrTonePwm = 4;
+            const uint8_t IrToneResolution = 8;
+        #else
+            const uint8_t IrRxPin = 2;
+            const uint8_t IrTxTonePin = 3;
+            const uint8_t IrTxDataPin = 12;
+        #endif
+
         const unsigned int IrTxFrequency = 40000;
         
         const int8_t PingTimeout = -1;
