@@ -7,7 +7,7 @@
 #######################################
 
 Bot_IR	KEYWORD1
-Bot_Motor		KEYWORD1
+Bot_Motor	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -31,16 +31,16 @@ rxPing	KEYWORD2
 ping	KEYWORD2
 
 # for Bot_Motor
-motor 			KEYWORD2
-forward 		KEYWORD2
-backward		KEYWORD2
-left			KEYWORD2
-right			KEYWORD2
-stop			KEYWORD2
-moveForward		KEYWORD2
-motorOffset		KEYWORD2
-motorOffset		KEYWORD2
-setup			KEYWORD2
+motor	KEYWORD2
+forward	KEYWORD2
+backward	KEYWORD2
+left	KEYWORD2
+right	KEYWORD2
+stop	KEYWORD2
+moveForward	KEYWORD2
+motorOffset	KEYWORD2
+motorOffset	KEYWORD2
+setup	KEYWORD2
 
 #######################################
 # Instances (KEYWORD2)
@@ -50,31 +50,31 @@ setup			KEYWORD2
 # Constants (LITERAL1)
 #######################################
 
-Remote_ch_minus		LITERAL1
-Remote_ch			LITERAL1
-Remote_ch_plus		LITERAL1
-Remote_prev			LITERAL1
-Remote_next			LITERAL1
-Remote_play			LITERAL1
+Remote_ch_minus	LITERAL1
+Remote_ch	LITERAL1
+Remote_ch_plus	LITERAL1
+Remote_prev	LITERAL1
+Remote_next	LITERAL1
+Remote_play	LITERAL1
 Remote_vol_minus	LITERAL1
-Remote_vol_plus		LITERAL1
-Remote_eq			LITERAL1
-Remote_0			LITERAL1
-Remote_100			LITERAL1
-Remote_200			LITERAL1
-Remote_1			LITERAL1
-Remote_2			LITERAL1
-Remote_3			LITERAL1
-Remote_4			LITERAL1
-Remote_5			LITERAL1
-Remote_6			LITERAL1
-Remote_7			LITERAL1
-Remote_8			LITERAL1
-Remote_9			LITERAL1
-Remote_asterisk		LITERAL1
-Remote_hash			LITERAL1
-Remote_ok			LITERAL1
-Remote_up_arrow		LITERAL1
+Remote_vol_plus	LITERAL1
+Remote_eq	LITERAL1
+Remote_0	LITERAL1
+Remote_100	LITERAL1
+Remote_200	LITERAL1
+Remote_1	LITERAL1
+Remote_2	LITERAL1
+Remote_3	LITERAL1
+Remote_4	LITERAL1
+Remote_5	LITERAL1
+Remote_6	LITERAL1
+Remote_7	LITERAL1
+Remote_8	LITERAL1
+Remote_9	LITERAL1
+Remote_asterisk	LITERAL1
+Remote_hash	LITERAL1
+Remote_ok	LITERAL1
+Remote_up_arrow	LITERAL1
 Remote_down_arrow	LITERAL1
 Remote_left_arrow	LITERAL1
 Remote_right_arrow	LITERAL1
