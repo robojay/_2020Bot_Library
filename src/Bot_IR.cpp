@@ -357,7 +357,7 @@ void Bot_IR::txInit() {
   #if defined(ARDUINO_ARCH_ESP32)
     timer = timerBegin(0, 80, true);  
     timerAttachInterrupt(timer, Bot_IR::irTxInterruptHandler, true);
-    timerAlarmWrite(timer, 500, true);
+    timerAlarmWrite(timer, IrTxTime, true);
   #else
     Timer1.initialize(IrTxTime);
   #endif
