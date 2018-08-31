@@ -2,11 +2,16 @@
 
 An Arduino library designed to be used with the 2020 Bot (http://2020bot.com).
 
+Installable via the Arduino Library Manager (see https://www.arduino.cc/en/Guide/Libraries for help).
+Filter on 2020 and you should see the _2020Bot_Library 
+
+Additional requirements:
+
 For the standard 2020 Bot using an Arduino Nano:
 	Requires Timer One library (https://github.com/PaulStoffregen/TimerOne).
 
 For the enhanced 2020 Bot using an Espressif ESP32 Dev Module:
-	Requires installation of the ESP32 support for Arduino (https://github.com/espressif/arduino-esp32#using-through-arduino-ide)
+	Requires installation of the ESP32 support for Arduino (https://github.com/espressif/arduino-esp32#installation-instructions)
 
 ## Warning!!!
 
