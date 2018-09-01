@@ -36,9 +36,9 @@ class Bot_IR {
         bool ping();
         
         #if defined(ARDUINO_ARCH_ESP32)
-            const uint8_t IrRxPin = 4;
-            const uint8_t IrTxTonePin = 15;
-            const uint8_t IrTxDataPin = 2;
+            const uint8_t IrRxPin = 18;
+            const uint8_t IrTxTonePin = 25;
+            const uint8_t IrTxDataPin = 5;
 
             const uint8_t IrTonePwm = 4;
             const uint8_t IrToneResolution = 8;

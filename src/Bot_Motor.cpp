@@ -84,20 +84,20 @@ void Bot_Motor::motor(bool motor, int v) {
   if (v != last) {
     if (v > 0) {
       #if defined(ARDUINO_ARCH_ESP32)
-        ledcWrite(a, v);
-        ledcWrite(b, 0);
+        ledcWrite(a, 0);
+        ledcWrite(b, v);
       #else
-        analogWrite(a, v);
-        analogWrite(b, 0);
+        analogWrite(a, 0);
+        analogWrite(b, v);
       #endif
     }
     else {
       #if defined(ARDUINO_ARCH_ESP32)
-        ledcWrite(a, 0);
-        ledcWrite(b, -v);
+        ledcWrite(a, -v);
+        ledcWrite(b, 0);
       #else
-        analogWrite(a, 0);
-        analogWrite(b, -v);
+        analogWrite(a, -v);
+        analogWrite(b, 0);
       #endif
     }
     if (motor == Left) {

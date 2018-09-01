@@ -26,6 +26,11 @@ Thanks for your understanding!
 
 --Jay
 
+## Release Notes
+
+###v0.0.8 (experimental)
+* Corrected pin mappings for the motor driver.  This won't affect 2020 Bots built following the kit build instructions, but may affect those who built according to the original code.
+
 ## License
 
 Copyright (c) 2017 Jay Francis.  Licensed under the MIT license.

@@ -21,10 +21,10 @@ class Bot_Motor {
         
         // Default Motor Pins
         #if defined(ARDUINO_ARCH_ESP32)
-            const uint8_t LeftAPin = 16;
-            const uint8_t LeftBPin = 17;
-            const uint8_t RightAPin = 21;
-            const uint8_t RightBPin = 22;
+            const uint8_t LeftAPin = 22;
+            const uint8_t LeftBPin = 21;
+            const uint8_t RightAPin = 23;
+            const uint8_t RightBPin = 19;
 
             const uint16_t PwmFreq = 50000;
             const uint8_t PwmResolution = 8;
@@ -35,10 +35,10 @@ class Bot_Motor {
             const uint8_t RightBpwm = 3;
 
         #else
-            const uint8_t LeftAPin = 10;
-            const uint8_t LeftBPin = 9;
-            const uint8_t RightAPin = 6;
-            const uint8_t RightBPin = 5;
+            const uint8_t LeftAPin = 9;
+            const uint8_t LeftBPin = 10;
+            const uint8_t RightAPin = 5;
+            const uint8_t RightBPin = 6;
         #endif
 
         const bool Left = false;
