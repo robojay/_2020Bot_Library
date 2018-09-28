@@ -40,11 +40,19 @@ Bot_IR::Bot_IR(uint8_t txTonePin, uint8_t txDataPin, uint8_t rxPin) {
 // their own purposes.
 Bot_IR* Bot_IR::_defaultInstance;
 
+#if defined(ARDUINO_ARCH_ESP32)
+void IRAM_ATTR Bot_IR::irEdgeInterruptHandler() {
+#else
 void Bot_IR::irEdgeInterruptHandler() {
+#endif
     Bot_IR::_defaultInstance->irEdge();
 }
 
+#if defined(ARDUINO_ARCH_ESP32)
+void IRAM_ATTR Bot_IR::irTxInterruptHandler() {
+#else
 void Bot_IR::irTxInterruptHandler() {
+#endif
     Bot_IR::_defaultInstance->irTx();
 }
 
@@ -123,7 +131,11 @@ void Bot_IR::setup(bool txInitialize) {
 // It is designed to work with the basic IR Remotes supplied with the 2020Bot
 // and also to listen to other 2020Bots
 // Different remotes may not (probably won't) work!
+#if defined(ARDUINO_ARCH_ESP32)
+void IRAM_ATTR Bot_IR::irEdge() {
+#else
 void Bot_IR::irEdge() {
+#endif
   static unsigned long _irStartTime = 0;
   static unsigned long _irHighTime = 0;
   static uint8_t _irCount = 0;
@@ -212,7 +224,11 @@ uint32_t Bot_IR::rxData() {
 
 // Transmitter interrupt state machine
 // This is called using the Timer1 timer interrupt every 500us
+#if defined(ARDUINO_ARCH_ESP32)
+void IRAM_ATTR Bot_IR::irTx() {
+#else
 void Bot_IR::irTx() {
+#endif
   static uint8_t _irTxCount = 0;
   static uint8_t _irOneBit = 0;
   static IrTxStates _irTxState = Idle;

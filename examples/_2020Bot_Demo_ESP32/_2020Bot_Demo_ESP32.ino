@@ -67,6 +67,8 @@ const char Hex[] = "0123456789ABCDEF";
 // Arduino standard 
 const uint8_t Led = 13;
 
+const uint8_t ClearDefaultsPin = 0;
+
 // Configuration Structure
 struct Config {
   char ssid[32 + 1];      // 32 bytes plus null 
@@ -230,9 +232,113 @@ void handleRemote() {
 }
 
 void handleConfig() {
+  
+  String config = ""
+    "<!doctype html>"
+    "<html lang=en>"
+    "<head>"
+    "<meta charset=utf-8>"
+    "<title>2020 Bot</title>"
+    "</head>"
+    "<body>"
+        "<form action=\"/save\" method=\"post\">"
+            "SSID :"
+            "<input type=\"text\" name=\"ssid\" value=\"";
+  config += String(robotConfig.ssid);
+  config += "\"><br>"
+            "Password :"
+            "<input type=\"text\" name=\"password\" value=\"";
+  config += String(robotConfig.password);
+  config += "\"><br>";
+  config += "<input type=\"radio\" name=\"apmode\" value=\"true\"";
+  if (robotConfig.apMode) {
+    config += " checked";
+  }
+  config += ">Access Point"
+            "<input type=\"radio\" name=\"apmode\" value=\"false\"";
+  if (!robotConfig.apMode) {
+    config += " checked";
+  }
+  config += ">WiFi Client<br>"
+            "Local Name :"
+            "<input type=\"text\" name=\"localname\" value=\"";
+  config += String(robotConfig.localName);
+  config += "\"><br>"
+            "<input type=\"submit\" value=\"Submit\">"
+        "</form>"
+    "</body>"
+    "</html>";
+
   digitalWrite(Led, HIGH);
-  server.send(200, "text/plain", "config");
+  server.send(200, "text/html", config);
   digitalWrite(Led, LOW);
+}
+
+void handleSave() {
+  char buf[65];
+  String save = ""
+    "<!doctype html>"
+    "<html lang=en>"
+    "<head>"
+    "<head>"
+    "<meta http-equiv=\"Refresh\" content=\"5; url=http://";
+  save += String(robotConfig.localName);
+  save += ".local/";
+  save += "\">";
+  save += "<body>Settings saved... rebooting...</body>";
+  save += "</head>";
+  
+  if (server.args() != 0) {
+    // clear, then set the ssid
+    memset(robotConfig.ssid, '\0', sizeof(robotConfig.ssid));
+    server.arg(0).toCharArray(buf, sizeof(buf));
+    strcpy(robotConfig.ssid, buf);
+
+    // clear, then set the password
+    memset(robotConfig.password, '\0', sizeof(robotConfig.password));
+    server.arg(1).toCharArray(buf, sizeof(buf));
+    strcpy(robotConfig.password, buf);
+
+    if (server.arg(2) == "true") {
+      robotConfig.apMode = true;
+    }
+    else {
+      robotConfig.apMode = false;
+    }
+    
+    // clear, then set local name
+    memset(robotConfig.localName, '\0', sizeof(robotConfig.localName));
+    server.arg(3).toCharArray(buf, sizeof(buf));
+    strcpy(robotConfig.localName, buf);
+
+    Serial.println("Saving settings...");
+
+    Serial.print("SSID: ");
+    Serial.println(robotConfig.ssid);
+    Serial.print("Password: ");
+    Serial.println(robotConfig.password);
+    Serial.print("Mode: ");
+    if (robotConfig.apMode) {
+      Serial.println("Access Point");
+    }
+    else {
+      Serial.println("Station");
+    }
+    Serial.print("Local Network Name: ");
+    Serial.print(robotConfig.localName);
+    Serial.println(".local");
+
+    ir.irTxIntDisable();
+    preferences.begin("2020bot", false);
+    preferences.putBytes("robotConfig", (unsigned char *)&robotConfig, sizeof(robotConfig));
+    preferences.end();
+    ir.irTxIntEnable();
+
+    Serial.println("Settings saved");
+  }
+  server.send(200, "text/html", save);
+  delay(2000);
+  ESP.restart();    
 }
 
 void handleNotFound() {
@@ -332,6 +438,8 @@ motion_t arbitrate() {
 
 void setup() {
   pinMode(Led, OUTPUT);
+  pinMode(ClearDefaultsPin, INPUT_PULLUP);
+  
   digitalWrite(Led, LOW);
   Serial.begin(115200);
 
@@ -354,6 +462,7 @@ void setup() {
   else {
     // they exist, good deal...
     Serial.println("Read robot configuration");
+    preferences.getBytes("robotConfig", (unsigned char *)&robotConfig, sizeof(robotConfig));
   }
   preferences.end();
 
@@ -372,8 +481,27 @@ void setup() {
   Serial.print(robotConfig.localName);
   Serial.println(".local");
    
-  WiFi.mode( WIFI_AP );
-  WiFi.softAP(robotConfig.ssid, robotConfig.password);
+  if (robotConfig.apMode) {
+    WiFi.disconnect();
+    WiFi.mode( WIFI_AP );
+    WiFi.softAP(robotConfig.ssid, robotConfig.password);
+  } 
+  else {
+    if (WiFi.status() == WL_CONNECTED) {
+      WiFi.disconnect();
+    }
+    Serial.print("Connecting");
+    WiFi.begin(robotConfig.ssid, robotConfig.password);
+        while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("");
+    Serial.println("WiFi connected");
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());  
+  }
+  
 
   if (MDNS.begin(robotConfig.localName)) {
     Serial.println("MDNS responder started");
@@ -389,6 +517,7 @@ void setup() {
   server.on("/remote", handleRemote);
 
   server.on("/config", handleConfig);
+  server.on("/save", handleSave);
   server.onNotFound(handleNotFound);
 
   server.begin();
@@ -407,6 +536,19 @@ void loop() {
   static unsigned long motionTimeout = Timeout;
 
   server.handleClient();
+
+  if (digitalRead(ClearDefaultsPin) == LOW) {
+    Serial.println("Setting default robot configuration");
+    setDefaults();
+    ir.irTxIntDisable();
+    preferences.begin("2020bot", false);
+    preferences.putBytes("robotConfig", (unsigned char *)&robotConfig, sizeof(robotConfig));
+    preferences.end();
+    ir.irTxIntEnable();
+        
+    delay(1000);
+    ESP.restart();
+  }
 
   if (webCommand != WebNone) {
     switch (webCommand) {

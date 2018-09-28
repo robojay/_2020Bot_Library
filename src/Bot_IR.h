@@ -61,8 +61,8 @@ class Bot_IR {
         
     private:
 
-        void irEdge();
-        void irTx();
+        void IRAM_ATTR irEdge();
+        void IRAM_ATTR irTx();
         
         uint8_t _txTonePin;
         uint8_t _rxPin;
