@@ -1,5 +1,6 @@
 #include "WiFi.h"
 #include "Esp.h"
+#include "AsyncUDP.h"
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
@@ -39,13 +40,26 @@ const int MotorOffsetMin = -10;
 const int MotorOffsetStep = 2;
 const unsigned long Timeout = 5000;
 
-typedef enum {None, Forward, Backward, Left, Right, Stop} motion_t;
+typedef enum {None, Forward, Backward, Left, Right, Move, Stop} motion_t;
 typedef enum {Remote, Autonomous} robotMode_t;
 
 typedef enum {WebNone, WebForward, WebReverse, WebLeft, WebRight, WebStop, WebAuto, WebRemote} webCommand_t;
 
 motion_t robotAction = None;
 webCommand_t webCommand = WebNone;
+
+struct udpCommand_t {
+  bool valid = false;
+  bool move = false;
+  int leftSpeed = 127;
+  int rightSpeed = 127;
+};
+
+udpCommand_t udpCommand;
+
+// items for UDP interface
+AsyncUDP udp;
+const unsigned int udpPort = 2020;
 
 // behavior requested by bumpers
 motion_t bumperRequest;
@@ -67,7 +81,7 @@ const char Hex[] = "0123456789ABCDEF";
 // Arduino standard 
 const uint8_t Led = 13;
 
-const uint8_t ClearDefaultsPin = 0;
+const uint8_t ClearDefaultsPin = 4;
 
 // Configuration Structure
 struct Config {
@@ -390,6 +404,59 @@ void setDefaults() {
   strcpy(robotConfig.localName, DefaultLocalName);
 }
 
+// UDP packet processing
+void handlePacket(AsyncUDPPacket packet) {
+
+  /*
+  Serial.print("UDP Packet Type: ");
+  Serial.print(packet.isBroadcast()?"Broadcast":packet.isMulticast()?"Multicast":"Unicast");
+  Serial.print(", From: ");
+  Serial.print(packet.remoteIP());
+  Serial.print(":");
+  Serial.print(packet.remotePort());
+  Serial.print(", To: ");
+  Serial.print(packet.localIP());
+  Serial.print(":");
+  Serial.print(packet.localPort());
+  Serial.print(", Length: ");
+  Serial.print(packet.length());
+  Serial.print(", Data: ");
+  Serial.write(packet.data(), packet.length());
+  Serial.println();
+  udp.writeTo((const uint8_t *)"Got It!", 7, packet.remoteIP(), 2020);
+  */
+  
+  // expect a packet to be:
+  // Header (uint16_t) 0x2020
+  // Left Motor (int8_t)
+  // Right Motor (int8_t)
+  //
+  // Where Left and Right Motor values could be:
+  // -100 through 100 (decimal) : motor PWM value
+  // 127 (decimal) : no operation, will still keep link alive and generate status reply
+  
+  if (packet.length() == 4) {
+    uint8_t *packetData;    
+    packetData = packet.data();
+    if ((packetData[0] == 0x20) && (packetData[1] == 0x20)) {
+      int8_t leftMotorValue = packetData[2];
+      int8_t rightMotorValue = packetData[3];
+      if ((leftMotorValue != 127) and (rightMotorValue != 127)) {
+        udpCommand.leftSpeed = (int)leftMotorValue;
+        udpCommand.rightSpeed = (int) rightMotorValue;
+        udpCommand.move = true;
+      }
+      udpCommand.valid = true;
+    }
+  }
+
+  if (udpCommand.valid) {
+    //Serial.println("Valid UDP Packet");
+  }
+  // always send a reply
+
+}
+
 motion_t bumperBehavior() {
   static motion_t lastBumped = None;
   static motion_t bumpAction = None;
@@ -449,6 +516,16 @@ void setup() {
     delay(100);
     digitalWrite(Led,LOW);
     delay(100);
+  }
+
+  if (digitalRead(ClearDefaultsPin) == LOW) {
+    Serial.println("Setting default robot configuration");
+    setDefaults();
+    preferences.begin("2020bot", false);
+    preferences.putBytes("robotConfig", (unsigned char *)&robotConfig, sizeof(robotConfig));
+    preferences.end();
+    delay(1000);
+    ESP.restart();
   }
   
   // attempt to read the configuration
@@ -523,6 +600,14 @@ void setup() {
   server.begin();
   Serial.println("HTTP server started");
 
+  if(udp.listen(udpPort)) {
+      Serial.print("UDP Listening on IP: ");
+      Serial.print(WiFi.localIP());
+      Serial.print(" Port: ");
+      Serial.println(udpPort);
+      udp.onPacket(handlePacket);
+  }
+
   ir.setup();
   motor.setup();
 
@@ -534,6 +619,8 @@ void loop() {
   static unsigned long delayTimer = 0;
   uint32_t irCode;
   static unsigned long motionTimeout = Timeout;
+  int moveLeftSpeed = 0;
+  int moveRightSpeed = 0;
 
   server.handleClient();
 
@@ -548,6 +635,35 @@ void loop() {
         
     delay(1000);
     ESP.restart();
+  }
+
+  // hmm... udpCommand might be updated in another task
+  // probably need a semaphore...
+  if (udpCommand.valid) {
+    //Serial.print("UDP ");
+    if (udpCommand.move) {
+      //Serial.print("move ");
+      if ((udpCommand.leftSpeed == 0) && (udpCommand.rightSpeed == 0)) { 
+        robotAction = Stop;
+        //Serial.println("stop");
+      }
+      else {
+        robotAction = Move;
+        robotMode = Remote;
+        moveLeftSpeed = udpCommand.leftSpeed;
+        moveRightSpeed = udpCommand.rightSpeed;
+        //Serial.print(moveLeftSpeed);
+        //Serial.print(" ");
+        //Serial.println(moveRightSpeed);
+      }
+      udpCommand.move = false;
+    }
+    else {
+      //Serial.println("<unknown>");
+    }
+
+    udpCommand.valid = false;
+    motionTimeout = Timeout;
   }
 
   if (webCommand != WebNone) {
@@ -680,6 +796,10 @@ void loop() {
         break;
       case Right:
         motor.right(speed);
+        break;
+      case Move:
+        motor.moveForward(moveLeftSpeed, moveRightSpeed);
+        robotAction = None;
         break;
       case None:
         break;
